@@ -1,0 +1,245 @@
+<!--
+
+Evaluativo nro. 2 
+Cátedra: JavaScript
+Alumno: Manuel Paz
+Cédula: 28.264.712
+Sección: N-1113P
+
+-->
+
+<?php include('config.php'); ?>
+
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+    <link rel="shorcut icon" type="x-icon" href="imagenes/logo.png">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Actividades</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: grid;
+            justify-content: center;
+            align-items: center;
+            color: #4f546c;
+            font-size: 0.9rem;
+            background-color: #f9fbff;
+            margin: 0;
+            height: 100vh;
+        }
+
+        table {
+            border-collapse: collapse;
+            box-shadow: 0 5px 10px #e1e5ee;
+            background-color: white;
+            text-align: left;
+            overflow: hidden;
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+        }
+
+        thead {
+            box-shadow: 0 5px 10px #e1e5ee;
+        }
+
+        th {
+            padding: 1rem 2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1rem;
+            font-size: 0.7rem;
+            font-weight: 900;
+        }
+
+        td {
+            padding: 1rem 2rem;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f4f6fb;
+        }
+    </style>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        function validarCamposCrear() {
+            var descripcion = document.getElementById('descripcion').value;
+            var fechaInicio = document.getElementById('fecha_inicio').value;
+            var fechaFin = document.getElementById('fecha_fin').value;
+            var responsable = document.getElementById('responsable').value;
+
+            if (descripcion === '' || fechaInicio === '' || fechaFin === '' || responsable === '') {
+                alert('Por favor, complete todos los campos para crear una actividad.');
+                return false;
+            }
+
+            return true;
+        }
+
+        function validarCamposModificar() {
+            var id = document.getElementById('id_modificar').value;
+            var nuevaDescripcion = document.getElementById('nueva_descripcion').value;
+            var nuevaFechaInicio = document.getElementById('nueva_fecha_inicio').value;
+            var nuevaFechaFin = document.getElementById('nueva_fecha_fin').value;
+            var nuevoResponsable = document.getElementById('nuevo_responsable').value;
+
+            if (id === '' || nuevaDescripcion === '' || nuevaFechaInicio === '' || nuevaFechaFin === '' || nuevoResponsable === '') {
+                alert('Por favor, complete todos los campos para modificar una actividad.');
+                return false;
+            }
+
+            return true;
+        }
+
+        function validarCampoEliminar() {
+            var idEliminar = document.getElementById('id_eliminar').value;
+
+            if (idEliminar === '') {
+                alert('Por favor, introduzca el ID para eliminar la actividad.');
+                return false;
+            }
+
+            return true;
+        }
+
+        function crearActividad() {
+            if (validarCamposCrear()) {
+                var descripcion = document.getElementById('descripcion').value;
+                var fechaInicio = document.getElementById('fecha_inicio').value;
+                var fechaFin = document.getElementById('fecha_fin').value;
+                var responsable = document.getElementById('responsable').value;
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'crear_actividad.php',
+                    data: {
+                        descripcion: descripcion,
+                        fecha_inicio: fechaInicio,
+                        fecha_fin: fechaFin,
+                        responsable: responsable
+                    },
+                    success: function(response) {
+                        console.log(response);
+                        consultarActividades(); // Recargar la tabla después de la creación
+                    }
+                });
+            }
+        }
+
+        function modificarActividad() {
+            if (validarCamposModificar()) {
+                var id = document.getElementById('id_modificar').value;
+                var nuevaDescripcion = document.getElementById('nueva_descripcion').value;
+                var nuevaFechaInicio = document.getElementById('nueva_fecha_inicio').value;
+                var nuevaFechaFin = document.getElementById('nueva_fecha_fin').value;
+                var nuevoResponsable = document.getElementById('nuevo_responsable').value;
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'modificar_actividad.php',
+                    data: {
+                        id: id,
+                        descripcion: nuevaDescripcion,
+                        fecha_inicio: nuevaFechaInicio,
+                        fecha_fin: nuevaFechaFin,
+                        responsable: nuevoResponsable
+                    },
+                    success: function(response) {
+                        console.log(response);
+                        consultarActividades(); // Recargar la tabla después de la modificación
+                    }
+                });
+            }
+        }
+
+        function eliminarActividad() {
+            if (validarCampoEliminar()) {
+                var idEliminar = document.getElementById('id_eliminar').value;
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'eliminar_actividad.php',
+                    data: {
+                        id: idEliminar
+                    },
+                    success: function(response) {
+                        console.log(response);
+                        consultarActividades(); // Recargar la tabla después de la eliminación
+                    }
+                });
+            }
+        }
+
+        function consultarActividades() {
+            $.ajax({
+                type: 'GET',
+                url: 'consultar_actividades.php',
+                success: function(response) {
+                    var actividades = JSON.parse(response);
+                    var table = "<table class='table table-striped'><thead><tr><th>Identificador</th><th>Descripción</th><th>Fecha de Inicio</th><th>Fecha Fin</th><th>Responsable</th></tr></thead><tbody>";
+
+                    for (var i = 0; i < actividades.length; i++) {
+                        table += "<tr><td>" + actividades[i].id + "</td><td>" + actividades[i].descripcion + "</td><td>" + actividades[i].fecha_inicio + "</td><td>" + actividades[i].fecha_fin + "</td><td>" + actividades[i].responsable + "</td></tr>";
+                    }
+
+                    table += "</tbody></table>";
+                    document.getElementById("actividadesTable").innerHTML = table;
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            consultarActividades();
+        });
+    </script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Control de Actividades</h1>
+        <div class="row">
+            <div class="col-md-6">
+                <h2>Crear Actividad</h2>
+                <input type="text" id="descripcion" class="form-control mb-2" placeholder="Descripción">
+                <input type="date" id="fecha_inicio" class="form-control mb-2">
+                <input type="date" id="fecha_fin" class="form-control mb-2">
+                <input type="text" id="responsable" class="form-control mb-2" placeholder="Responsable">
+                <button onclick="crearActividad()" class="btn btn-primary">Crear Actividad</button>
+            </div>
+            <div class="col-md-6">
+                <h2>Modificar Actividad</h2>
+                <input type="text" id="id_modificar" class="form-control mb-2" placeholder="ID a Modificar">
+                <input type="text" id="nueva_descripcion" class="form-control mb-2" placeholder="Nueva Descripción">
+                <input type="date" id="nueva_fecha_inicio" class="form-control mb-2">
+                <input type="date" id="nueva_fecha_fin" class="form-control mb-2">
+                <input type="text" id="nuevo_responsable" class="form-control mb-2" placeholder="Nuevo Responsable">
+                <button onclick="modificarActividad()" class="btn btn-primary">Modificar Actividad</button>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h2>Eliminar Actividad</h2>
+                <input type="text" id="id_eliminar" class="form-control mb-2" placeholder="ID a Eliminar">
+                <button onclick="eliminarActividad()" class="btn btn-danger">Eliminar Actividad</button>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <table>
+                    <tbody id="actividadesTable">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

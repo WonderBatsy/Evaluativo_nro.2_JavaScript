@@ -1,0 +1,3 @@
+Profesor, debe crear una base de datos llamada "actividades" e importar el archivo .sql proporcionado en ella.
+
+Luego, debe mover la carpeta "actividades_diarias" a la carpeat "htdocs" y eso debería ser suficiente para poder visualizar la página. Saludos
